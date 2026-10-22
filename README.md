@@ -54,9 +54,10 @@ and Tailwind v4. They take plain props and do no data fetching.
 
 ## Contributing
 
-This repository is published from Twelfth's main codebase on every change to
-the components, so pull requests here are copied across by hand. Issues and
-suggestions are welcome: open an issue, or write to hello@twelfth.ai.
+The components are written in Twelfth's main codebase and published to
+https://ui.twelfth.ai on every deploy; this repository mirrors that registry
+hourly (`scripts/sync.mjs`). Pull requests here are copied across by hand.
+Issues and suggestions are welcome: open an issue, or write to hello@twelfth.ai.
 
 ## Licence
 

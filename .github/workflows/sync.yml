@@ -1,0 +1,32 @@
+# Mirrors the components from https://ui.twelfth.ai/r, which Twelfth's main
+# codebase publishes on every deploy. Hourly, or by hand from the Actions tab.
+name: Sync from ui.twelfth.ai
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/sync.mjs
+      - name: Commit changes
+        run: |
+          if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+            echo "Already in step with ui.twelfth.ai."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Sync from ui.twelfth.ai"
+          git push
