@@ -1,3 +1,5 @@
+[![Catman UI: open-source shadcn components for category managers](.github/hero.png)](https://ui.twelfth.ai)
+
 # Twelfth catman UI
 
 Open-source [shadcn](https://ui.shadcn.com) components for category managers and
