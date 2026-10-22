@@ -2,7 +2,8 @@
 // Pulls the components from the live registry at ui.twelfth.ai into this
 // repository. The registry serves every file's source, so the public repo
 // mirrors exactly what is deployed, with no access to Twelfth's private code.
-import { mkdir, readdir, rm, writeFile } from "node:fs/promises"
+import { execFileSync } from "node:child_process"
+import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises"
 import { dirname, join, relative } from "node:path"
 
 const ORIGIN = "https://ui.twelfth.ai/r"
@@ -39,3 +40,38 @@ for (const file of await walk(SOURCE_DIR)) {
 }
 await writeFile(join(ROOT, "registry.json"), `${JSON.stringify(index, null, 2)}\n`)
 console.log(`synced ${index.items.length} items, ${written.size} files → ${relative(ROOT, SOURCE_DIR)}`)
+
+// --commit (CI): record the changes as one commit made by GitHub's API, which
+// signs it, rather than an unsigned `git commit` from the runner.
+if (process.argv.includes("--commit")) {
+  const status = execFileSync("git", ["status", "--porcelain", "--untracked-files=all"], { cwd: ROOT, encoding: "utf8" })
+  const changes = status.split("\n").filter(Boolean).map((line) => ({ code: line.slice(0, 2), path: line.slice(3) }))
+  if (changes.length === 0) {
+    console.log("Already in step with ui.twelfth.ai.")
+  } else {
+    const additions = []
+    const deletions = []
+    for (const { code, path } of changes) {
+      if (code.includes("D")) deletions.push({ path })
+      else additions.push({ path, contents: (await readFile(join(ROOT, path))).toString("base64") })
+    }
+    const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: ROOT, encoding: "utf8" }).trim()
+    const branch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: ROOT, encoding: "utf8" }).trim()
+    const response = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: { authorization: `bearer ${process.env.GITHUB_TOKEN}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        query: "mutation($input: CreateCommitOnBranchInput!) { createCommitOnBranch(input: $input) { commit { oid url } } }",
+        variables: { input: {
+          branch: { repositoryNameWithOwner: process.env.GITHUB_REPOSITORY, branchName: branch },
+          expectedHeadOid: head,
+          message: { headline: "Sync from ui.twelfth.ai" },
+          fileChanges: { additions, deletions },
+        } },
+      }),
+    })
+    const result = await response.json()
+    if (result.errors) throw new Error(JSON.stringify(result.errors))
+    console.log(`committed ${changes.length} change(s): ${result.data.createCommitOnBranch.commit.url}`)
+  }
+}
