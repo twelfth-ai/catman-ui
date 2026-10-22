@@ -1,0 +1,167 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "twelfth",
+  "homepage": "https://ui.twelfth.ai",
+  "items": [
+    {
+      "name": "retail-format",
+      "type": "registry:lib",
+      "title": "Retail format",
+      "description": "Money, units, percent, price index and weeks of cover, formatted the way a category manager reads them (en-AU by default).",
+      "files": [
+        {
+          "path": "src/registry/catman/lib/retail-format.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "one-open",
+      "type": "registry:lib",
+      "title": "One open",
+      "description": "Keeps one hover card open at a time, so sweeping across a row of badges never stacks two cards.",
+      "files": [
+        {
+          "path": "src/registry/catman/lib/one-open.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "market-side",
+      "type": "registry:ui",
+      "title": "Market side",
+      "description": "The favourable / exposed / level tone every catman figure shares, the arrow that carries it without colour, and the two colour tokens behind it.",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/catman/ui/market-side.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "cssVars": {
+        "theme": {
+          "color-favourable": "var(--favourable)",
+          "color-favourable-foreground": "var(--favourable-foreground)",
+          "color-exposed": "var(--exposed)",
+          "color-exposed-foreground": "var(--exposed-foreground)"
+        },
+        "light": {
+          "favourable": "#dbece2",
+          "favourable-foreground": "#3e5c4b",
+          "exposed": "#f2e7c9",
+          "exposed-foreground": "#6b5223"
+        },
+        "dark": {
+          "favourable": "#273b2f",
+          "favourable-foreground": "#c2e5cc",
+          "exposed": "#373320",
+          "exposed-foreground": "#e9e1c0"
+        }
+      }
+    },
+    {
+      "name": "price-position",
+      "type": "registry:ui",
+      "title": "Price position",
+      "description": "Where our prices sit against a competitor (12% above, 4% below, in line), as a chip or as a badge with the index and matched-line evidence on hover.",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "https://ui.twelfth.ai/r/market-side.json",
+        "https://ui.twelfth.ai/r/one-open.json",
+        "https://ui.twelfth.ai/r/retail-format.json",
+        "popover"
+      ],
+      "files": [
+        {
+          "path": "src/registry/catman/ui/price-position.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "price-trend",
+      "type": "registry:ui",
+      "title": "Price trend",
+      "description": "Weekly price position against the market as a small line with a dashed parity line; hover or arrow through any week for its index and change.",
+      "registryDependencies": [
+        "https://ui.twelfth.ai/r/one-open.json",
+        "https://ui.twelfth.ai/r/retail-format.json",
+        "popover"
+      ],
+      "files": [
+        {
+          "path": "src/registry/catman/ui/price-trend.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "price-scoreboard",
+      "type": "registry:ui",
+      "title": "Price scoreboard",
+      "description": "The four numbers atop a pricing page: overall position vs market with its index and trend, then lines priced above, in line and below, each optionally a filter.",
+      "registryDependencies": [
+        "https://ui.twelfth.ai/r/price-trend.json",
+        "https://ui.twelfth.ai/r/retail-format.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/catman/ui/price-scoreboard.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "micro-trend",
+      "type": "registry:ui",
+      "title": "Micro trend",
+      "description": "A small inline chart of one or more lines over time for a table cell or tile: sales vs forecast with a dashed forecast, P10–P90 band and a this-week marker; gaps left blank; a gliding crosshair with a tooltip reading every series.",
+      "registryDependencies": [
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/registry/catman/ui/micro-trend.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "micro-stat",
+      "type": "registry:ui",
+      "title": "Micro stat",
+      "description": "The figures under a chart: a change indicator (\"vs LY ▲6.2%\") toned by whether up is good or bad, and a labelled figure (\"OTB $42k\"), each explained in a tooltip.",
+      "registryDependencies": [
+        "tooltip",
+        "https://ui.twelfth.ai/r/market-side.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/catman/ui/micro-stat.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "weeks-of-cover",
+      "type": "registry:ui",
+      "title": "Weeks of cover",
+      "description": "Weeks of stock on hand at the current rate of sale, on a track against the healthy band: short (stockout risk), in band, or over (aged cash).",
+      "registryDependencies": [
+        "https://ui.twelfth.ai/r/market-side.json",
+        "https://ui.twelfth.ai/r/retail-format.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/catman/ui/weeks-of-cover.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
+}
