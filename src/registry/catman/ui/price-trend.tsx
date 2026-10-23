@@ -25,12 +25,38 @@ export type PriceTrendPoint = {
 }
 
 const PAD = 2
+const SMOOTHING = 0.12
 const weekDate = new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })
 const figure = (value: number) => value.toLocaleString("en-AU", { maximumFractionDigits: 1 })
 
 function weekLabel(week: string) {
   const at = /^\d{4}-\d{2}-\d{2}$/.test(week) ? new Date(`${week}T12:00:00Z`) : null
   return at && Number.isFinite(at.getTime()) ? `Week of ${weekDate.format(at)}` : week
+}
+
+function linePath(points: Array<[number, number]>, smooth: boolean) {
+  if (points.length === 0) return ""
+  if (!smooth || points.length < 3) return points.map(([px, py], i) => `${i === 0 ? "M" : "L"}${px} ${py}`).join("")
+
+  let path = `M${points[0][0]} ${points[0][1]}`
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const previous = points[i - 1] ?? points[i]
+    const current = points[i]
+    const next = points[i + 1]
+    const following = points[i + 2] ?? next
+    const low = Math.min(current[1], next[1])
+    const high = Math.max(current[1], next[1])
+    const control1 = [
+      current[0] + (next[0] - previous[0]) * SMOOTHING,
+      Math.max(low, Math.min(high, current[1] + (next[1] - previous[1]) * SMOOTHING)),
+    ]
+    const control2 = [
+      next[0] - (following[0] - current[0]) * SMOOTHING,
+      Math.max(low, Math.min(high, next[1] - (following[1] - current[1]) * SMOOTHING)),
+    ]
+    path += `C${control1[0]} ${control1[1]} ${control2[0]} ${control2[1]} ${next[0]} ${next[1]}`
+  }
+  return path
 }
 
 export function PriceTrend({
@@ -41,6 +67,7 @@ export function PriceTrend({
   height = 28,
   inverse = false,
   axes = true,
+  smooth = true,
   className,
 }: {
   points: PriceTrendPoint[]
@@ -54,6 +81,8 @@ export function PriceTrend({
   inverse?: boolean
   /** A faint left edge and baseline, so the line reads as a size and a direction. */
   axes?: boolean
+  /** Gently rounds joins without overshooting the values. */
+  smooth?: boolean
   className?: string
 }) {
   const [open, setOpen] = useOneOpen()
@@ -68,21 +97,19 @@ export function PriceTrend({
   const y = (value: number) => height / 2 - (value / extent) * (height / 2 - PAD)
   const fmt = (n: number) => Number(n.toFixed(1))
 
-  let path = ""
+  const runs: Array<Array<[number, number]>> = []
   const lone: Array<[number, number]> = []
-  let run = 0
   points.forEach((p, i) => {
     if (p.positionPct === null) {
-      run = 0
       return
     }
     const px = fmt(x(i))
     const py = fmt(y(p.positionPct))
-    path += `${run === 0 ? "M" : "L"}${px} ${py}`
-    run += 1
-    const next = points[i + 1]?.positionPct
-    if (run === 1 && (next === null || next === undefined)) lone.push([px, py])
+    if (i === 0 || points[i - 1]?.positionPct === null) runs.push([])
+    runs.at(-1)?.push([px, py])
   })
+  runs.forEach((run) => { if (run.length === 1) lone.push(run[0]) })
+  const path = runs.map((run) => linePath(run, smooth)).join("")
 
   const first = points[0]?.positionPct ?? null
   const last = points.at(-1)?.positionPct ?? null
@@ -135,19 +162,21 @@ export function PriceTrend({
         onKeyDown={navigate}
         className="-my-1 inline-flex cursor-crosshair items-center rounded-sm p-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >{chart}</PopoverTrigger>
-      <PopoverContent side="top" align="center" sideOffset={8} initialFocus={false} finalFocus={false} className="w-64 max-w-[calc(100vw-2rem)] p-3 text-xs">
+      <PopoverContent side="top" align="center" sideOffset={8} initialFocus={false} finalFocus={false} className="w-80 max-w-[calc(100vw-2rem)] p-3 text-xs">
         {/* One child: stock popovers stack their children with a gap. */}
         <div>
-          <div className="font-medium text-popover-foreground">{label}</div>
+          <div className="truncate font-medium text-popover-foreground">{label}</div>
           <div aria-live="polite" aria-atomic="true">
             <p className="mt-0.5 text-muted-foreground">{point ? weekLabel(point.week) : "No weekly history"}</p>
-            {point?.positionPct != null ? <>
-              <p className="mt-2 text-lg font-semibold tabular-nums">{point.positionPct === 0 ? "At parity" : `${figure(Math.abs(point.positionPct))}% ${point.positionPct > 0 ? "above" : "below"} comparison price`}</p>
-              <div className="mt-2 flex items-baseline justify-between gap-3 border-t pt-2">
-                <span className="text-muted-foreground">Price index</span><span className="font-mono tabular-nums">{figure(100 + point.positionPct)}</span>
-              </div>
-              {change !== null ? <p className="mt-1 text-muted-foreground">{change > 0 ? "+" : change < 0 ? "−" : ""}{figure(Math.abs(change))} percentage points vs previous week</p> : <p className="mt-1 text-muted-foreground">No previous-week comparison</p>}
-            </> : <p className="mt-2 text-muted-foreground">Not enough comparable prices for this week.</p>}
+            <div className="mt-2 min-h-[4.75rem]">
+              {point?.positionPct != null ? <>
+                <p className="truncate text-base font-semibold tabular-nums">{point.positionPct === 0 ? "At parity" : `${figure(Math.abs(point.positionPct))}% ${point.positionPct > 0 ? "above" : "below"} comparison price`}</p>
+                <div className="mt-2 flex items-baseline justify-between gap-3 border-t pt-2">
+                  <span className="text-muted-foreground">Price index</span><span className="font-mono tabular-nums">{figure(100 + point.positionPct)}</span>
+                </div>
+                {change !== null ? <p className="mt-1 truncate text-muted-foreground">{change > 0 ? "+" : change < 0 ? "−" : ""}{figure(Math.abs(change))} percentage points vs previous week</p> : <p className="mt-1 text-muted-foreground">No previous-week comparison</p>}
+              </> : <p className="text-muted-foreground">Not enough comparable prices for this week.</p>}
+            </div>
             <p className="mt-2 border-t pt-2 text-muted-foreground">Our prices relative to {against}. The dashed line is parity (index 100).</p>
           </div>
         </div>
