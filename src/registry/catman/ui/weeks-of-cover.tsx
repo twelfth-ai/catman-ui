@@ -10,7 +10,7 @@ import type { MarketSide } from "@/registry/catman/ui/market-side"
  * `weeks` is saleable units ÷ weekly rate of sale, or null when nothing sold
  * (cover is unbounded, which is its own kind of problem).
  *
- * Part of the Twelfth catman registry (`@twelfth/weeks-of-cover`).
+ * Part of the twelfth catman registry (`@twelfth/weeks-of-cover`).
  */
 export type CoverState = "short" | "healthy" | "over" | "no-sales"
 

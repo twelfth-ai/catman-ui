@@ -14,7 +14,7 @@ import { MarketArrow, marketSideFromPosition, marketToneClass } from "@/registry
  * line". The position is the median gap across comparable lines, in percent,
  * ours vs theirs; null when there are too few matched lines to say.
  *
- * Part of the Twelfth catman registry (`@twelfth/price-position`).
+ * Part of the twelfth catman registry (`@twelfth/price-position`).
  */
 export const positionLabel = formatPosition
 

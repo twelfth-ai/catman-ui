@@ -6,7 +6,7 @@ import { ArrowDownIcon, ArrowUpIcon } from "lucide-react"
  * of every price figure: is this one going my way. Naming the tone after the
  * answer is what lets a price gap, an index and a cover position share it.
  *
- * Part of the Twelfth catman registry (`@twelfth/market-side`). The tones read
+ * Part of the twelfth catman registry (`@twelfth/market-side`). The tones read
  * the `favourable` and `exposed` colour tokens this item installs.
  */
 export type MarketSide = "favourable" | "exposed" | "level" | "unknown"

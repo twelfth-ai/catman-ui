@@ -3,7 +3,7 @@
  * percentages, a price index, and weeks of cover. en-AU and AUD by default,
  * because that is who reads it first; pass a locale and currency otherwise.
  *
- * Part of the Twelfth catman registry (`@twelfth/retail-format`).
+ * Part of the twelfth catman registry (`@twelfth/retail-format`).
  */
 
 export type RetailLocale = { locale?: string; currency?: string }

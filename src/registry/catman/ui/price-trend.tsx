@@ -15,7 +15,7 @@ import { formatMarketPosition } from "@/registry/catman/lib/retail-format"
  * "above" is always up. A week with no figure breaks the line rather than
  * being joined across: a gap is not a straight run.
  *
- * Part of the Twelfth catman registry (`@twelfth/price-trend`).
+ * Part of the twelfth catman registry (`@twelfth/price-trend`).
  */
 export type PriceTrendPoint = {
   /** ISO date the week starts, e.g. "2026-10-05". */

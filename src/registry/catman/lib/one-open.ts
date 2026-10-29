@@ -6,7 +6,7 @@ import { useCallback, useId, useSyncExternalStore } from "react"
  * the next badge opens a second card over the first. Opening any card that
  * uses this closes whichever was open.
  *
- * Part of the Twelfth catman registry (`@twelfth/one-open`).
+ * Part of the twelfth catman registry (`@twelfth/one-open`).
  */
 let openId: string | null = null
 const listeners = new Set<() => void>()

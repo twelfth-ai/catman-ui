@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils"
  * - `footer` sits under the chart, for a change indicator and a figure or two
  *   (see `@twelfth/micro-stat`).
  *
- * Part of the Twelfth catman registry (`@twelfth/micro-trend`).
+ * Part of the twelfth catman registry (`@twelfth/micro-trend`).
  */
 export type MicroTrendSeries = {
   key: string

@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
  * `MicroStat` is a labelled figure, "OTB $42k", with the sentence that
  * explains it in a tooltip.
  *
- * Part of the Twelfth catman registry (`@twelfth/micro-stat`).
+ * Part of the twelfth catman registry (`@twelfth/micro-stat`).
  */
 
 function Hint({ hint, children, className }: { hint?: ReactNode; children: ReactNode; className?: string }) {

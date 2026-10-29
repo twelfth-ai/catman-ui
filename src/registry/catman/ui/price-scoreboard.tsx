@@ -11,7 +11,7 @@ import { PriceTrend, type PriceTrendPoint } from "@/registry/catman/ui/price-tre
  * the market overall, then how many lines are priced above it, in line with
  * it, and below it. The three counts are filters when `onSelect` is given.
  *
- * Part of the Twelfth catman registry (`@twelfth/price-scoreboard`).
+ * Part of the twelfth catman registry (`@twelfth/price-scoreboard`).
  */
 export type PriceVerdict = "above" | "in_line" | "below"
 
