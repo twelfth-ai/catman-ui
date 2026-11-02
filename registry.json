@@ -89,6 +89,7 @@
       "title": "Price trend",
       "description": "Weekly price position against the market as a small line with a dashed parity line; hover or arrow through any week for its index and change.",
       "registryDependencies": [
+        "https://ui.twelfth.ai/r/market-side.json",
         "https://ui.twelfth.ai/r/one-open.json",
         "https://ui.twelfth.ai/r/retail-format.json",
         "popover"
@@ -96,6 +97,22 @@
       "files": [
         {
           "path": "src/registry/catman/ui/price-trend.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "tax-basis",
+      "type": "registry:ui",
+      "title": "Tax basis",
+      "description": "Whether a price includes tax, as a badge the price sits inside: filled when the tax is in the figure, hollow when it is left out. Hover explains the tax (GST, VAT, GST/HST, sales tax), its rate and the price on the other basis. Show, hide, or print both bases.",
+      "registryDependencies": [
+        "tooltip",
+        "https://ui.twelfth.ai/r/retail-format.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/catman/ui/tax-basis.tsx",
           "type": "registry:ui"
         }
       ]
@@ -112,6 +129,22 @@
       "files": [
         {
           "path": "src/registry/catman/ui/price-scoreboard.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "price-band",
+      "type": "registry:ui",
+      "title": "Price band",
+      "description": "A price band as a picture: how far from the market a line can sit across shelf prices (log scale) before it reads as priced above or below market, with tiers as steps, dollar limits as narrowing, a hover readout and optional line counts; plus a table-row mini.",
+      "registryDependencies": [
+        "https://ui.twelfth.ai/r/market-side.json",
+        "https://ui.twelfth.ai/r/retail-format.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/catman/ui/price-band.tsx",
           "type": "registry:ui"
         }
       ]

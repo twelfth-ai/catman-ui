@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { useOneOpen } from "@/registry/catman/lib/one-open"
 import { formatMarketPosition } from "@/registry/catman/lib/retail-format"
+import { MarketArrow, marketSideFromPosition, marketToneClass } from "@/registry/catman/ui/market-side"
 
 /**
  * Weeks of price position against the market, as a small line with a dashed
@@ -28,6 +29,8 @@ const PAD = 2
 const SMOOTHING = 0.12
 const weekDate = new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })
 const figure = (value: number) => value.toLocaleString("en-AU", { maximumFractionDigits: 1 })
+/** A figure in the card, set apart from the words around it. */
+const FIGURE_BADGE = "inline-flex items-center justify-center rounded-md bg-muted px-1.5 py-0.5 font-mono tabular-nums text-foreground"
 
 function weekLabel(week: string) {
   const at = /^\d{4}-\d{2}-\d{2}$/.test(week) ? new Date(`${week}T12:00:00Z`) : null
@@ -91,6 +94,7 @@ export function PriceTrend({
   const point = points[active]
   const previous = points[active - 1]?.positionPct
   const change = point?.positionPct != null && previous != null ? point.positionPct - previous : null
+  const side = marketSideFromPosition(point?.positionPct ?? null)
   const known = points.flatMap((p) => (p.positionPct === null ? [] : [Math.abs(p.positionPct)]))
   const extent = Math.max(2, ...known)
   const x = (i: number) => (points.length < 2 ? width / 2 : PAD + (i * (width - 2 * PAD)) / (points.length - 1))
@@ -162,21 +166,31 @@ export function PriceTrend({
         onKeyDown={navigate}
         className="-my-1 inline-flex cursor-crosshair items-center rounded-sm p-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >{chart}</PopoverTrigger>
-      <PopoverContent side="top" align="center" sideOffset={8} initialFocus={false} finalFocus={false} className="w-80 max-w-[calc(100vw-2rem)] p-3 text-xs">
+      <PopoverContent side="top" align="center" sideOffset={8} initialFocus={false} finalFocus={false} className="w-72 max-w-[calc(100vw-2rem)] p-3 text-xs">
         {/* One child: stock popovers stack their children with a gap. */}
         <div>
           <div className="truncate font-medium text-popover-foreground">{label}</div>
           <div aria-live="polite" aria-atomic="true">
             <p className="mt-0.5 text-muted-foreground">{point ? weekLabel(point.week) : "No weekly history"}</p>
-            <div className="mt-2 min-h-[4.75rem]">
-              {point?.positionPct != null ? <>
-                <p className="truncate text-base font-semibold tabular-nums">{point.positionPct === 0 ? "At parity" : `${figure(Math.abs(point.positionPct))}% ${point.positionPct > 0 ? "above" : "below"} comparison price`}</p>
-                <div className="mt-2 flex items-baseline justify-between gap-3 border-t pt-2">
-                  <span className="text-muted-foreground">Price index</span><span className="font-mono tabular-nums">{figure(100 + point.positionPct)}</span>
+            {point?.positionPct != null ? <>
+              {/* The figure sits in a fixed-width badge and the words never wrap, so
+                  moving from 0.4% to 11.1% does not reflow the card. */}
+              <div className="mt-2 flex items-center gap-2">
+                <span className={cn("inline-flex h-7 min-w-[5rem] shrink-0 items-center justify-center gap-0.5 rounded-md px-1.5 text-sm tabular-nums", side === "level" ? "bg-muted font-semibold" : marketToneClass[side])}>
+                  <MarketArrow side={side} pointing="ours" className="size-3.5" />{figure(Math.abs(point.positionPct))}%
+                </span>
+                <span className="truncate text-[13px] font-medium whitespace-nowrap">{point.positionPct === 0 ? "at parity" : `${point.positionPct > 0 ? "above" : "below"} comparison price`}</span>
+              </div>
+              <dl className="mt-2 space-y-1.5 border-t pt-2">
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-muted-foreground">Price index</dt><dd className={FIGURE_BADGE}>{figure(100 + point.positionPct)}</dd>
                 </div>
-                {change !== null ? <p className="mt-1 truncate text-muted-foreground">{change > 0 ? "+" : change < 0 ? "−" : ""}{figure(Math.abs(change))} percentage points vs previous week</p> : <p className="mt-1 text-muted-foreground">No previous-week comparison</p>}
-              </> : <p className="text-muted-foreground">Not enough comparable prices for this week.</p>}
-            </div>
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-muted-foreground">vs previous week</dt>
+                  {change !== null ? <dd className={FIGURE_BADGE}>{change > 0 ? "+" : change < 0 ? "−" : "±"}{figure(Math.abs(change))} pts</dd> : <dd className="py-0.5 text-muted-foreground">No figure</dd>}
+                </div>
+              </dl>
+            </> : <p className="mt-2 text-muted-foreground">Not enough comparable prices for this week.</p>}
             <p className="mt-2 border-t pt-2 text-muted-foreground">Our prices relative to {against}. The dashed line is parity (index 100).</p>
           </div>
         </div>
